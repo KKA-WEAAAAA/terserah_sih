@@ -1,0 +1,5 @@
+,Time (s),Memory (KB),Nodes Expanded,Path Cost,Solution Found,Optimality,Completeness,Scalability
+BFS,33.7499,6158.02,0,32,True,Optimal,Complete,Poor
+A*,21.6691,6416.53,0,32,True,Optimal,Complete,Good
+AC3+bFS,20.3994,5840.2,0,32,True,Sub-optimal,Complete,Fair
+Simulated Annealing,14.2866,114.71,0,0,False,Sub-optimal,Incomplete,Fair

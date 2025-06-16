@@ -1,0 +1,5 @@
+Algorithm,Time_seconds,Memory_KB,Nodes_Expanded,Path_Cost,Solution_Found,Optimality,Completeness,Scalability,Overall_Score
+BFS,33.7499,6158.02,0,32,True,Optimal,Complete,Poor,2.833333333333333
+A*,21.6691,6416.53,0,32,True,Optimal,Complete,Good,2.6666666666666665
+AC3+bFS,20.3994,5840.2,0,32,True,Sub-optimal,Complete,Fair,2.8999999999999995
+Simulated Annealing,14.2866,114.71,0,0,False,Sub-optimal,Incomplete,Fair,3.4
