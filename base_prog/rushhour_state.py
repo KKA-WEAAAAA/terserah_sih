@@ -3,12 +3,11 @@ import csv
 class Car:
     def __init__(self, cid, orientation, length, row, col):
         self.id = cid
-        self.orientation = orientation   # 'h', 'v', 'sh', 'b'
+        self.orientation = orientation   
         self.length = length
         self.row = row
         self.col = col
-        self.movable = orientation in ('h', 'v', 'sh')   # blok → False
-
+        self.movable = orientation in ('h', 'v', 'sh') 
     def positions(self):
         """Return list of coordinates occupied by the car."""
         return [
@@ -19,7 +18,7 @@ class Car:
 
 class RushHourState:
     def __init__(self, cars, grid_size=6):
-        self.cars = cars  # Dict: id -> Car
+        self.cars = cars 
         self.grid_size = grid_size
 
     @staticmethod
