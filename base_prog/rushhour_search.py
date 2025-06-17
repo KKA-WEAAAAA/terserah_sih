@@ -6,7 +6,7 @@ import math
 
 def bfs(initial_state):
     visited = set()
-    queue = deque([(initial_state, [])])  # (state, path)
+    queue = deque([(initial_state, [])]) 
 
     while queue:
         state, path = queue.popleft()
@@ -23,14 +23,14 @@ def bfs(initial_state):
             next_state, move_info = move
             queue.append((next_state, path + [move_info]))
 
-    return None  # No solution found
+    return None 
 
 def get_neighbors(state):
     neighbors = []
     for car in state.cars.values():
         if not car.movable:
             continue
-        for delta in [-1, 1]:  # Try move forward and backward
+        for delta in [-1, 1]:  
             new_state = deepcopy(state)
             car_copy = new_state.cars[car.id]
             if move_car(car_copy, delta, new_state):
@@ -38,12 +38,12 @@ def get_neighbors(state):
     return neighbors
 
 def move_car(car, delta, state):
-    # move horizontally
+
     if car.orientation == 'h':
         new_col = car.col + delta
         new_tail = new_col + car.length - 1
         if 0 <= new_col <= state.grid_size - car.length:
-            # Check collision
+    
             positions = state.occupied() - set(car.positions())
             for i in range(car.length):
                 pos = (car.row, new_col + i)
@@ -51,7 +51,7 @@ def move_car(car, delta, state):
                     return False
             car.col = new_col
             return True
-    # move vertically
+
     elif car.orientation == 'v':
         new_row = car.row + delta
         new_tail = new_row + car.length - 1
@@ -66,7 +66,7 @@ def move_car(car, delta, state):
     return False
 
 def a_star(start, is_goal, get_neighbors, heuristic, goal):
-    counter = itertools.count()  # unique sequence count
+    counter = itertools.count()  
     heap = [(heuristic(start, goal), next(counter), start)] 
     came_from = {}
     cost = {start: 0}
@@ -100,18 +100,18 @@ def heuristic_euclidean(positions:dict, node, goal):
 
 def heuristic_manhattan(state, goal):
     car = state.cars['sh']
-    return 5 - car.col  # jarak horizontal mobil merah ke pintu keluar
+    return 5 - car.col 
 
 
 def get_neighbors_astar(state):
     neighbors = []
     for car in state.cars.values():
-        for delta in [-1, 1]:  # move forward/backward
+        for delta in [-1, 1]:
             new_state = deepcopy(state)
             car_copy = new_state.cars[car.id]
             if move_car(car_copy, delta, new_state):
-                new_state.move = (car.id, delta)  # ini penting untuk tracking langkah
-                neighbors.append((new_state, 1))  # biaya tiap langkah = 1
+                new_state.move = (car.id, delta) 
+                neighbors.append((new_state, 1))  
     return neighbors
 
 
@@ -126,18 +126,18 @@ def legal_head_positions(state, car):
     heads = set()
 
     if car.orientation == 'h':
-        # geser kiri
+  
         col = car.col
         while col-1 >= 0 and (car.row, col-1) not in occupied_others:
             col -= 1
             heads.add((car.row, col))
-        # geser kanan
+       
         col = car.col
         while col+car.length < state.grid_size \
               and (car.row, col+car.length) not in occupied_others:
             col += 1
             heads.add((car.row, col))
-    else:  # vertical
+    else: 
         row = car.row
         while row-1 >= 0 and (row-1, car.col) not in occupied_others:
             row -= 1
@@ -147,7 +147,7 @@ def legal_head_positions(state, car):
               and (row+car.length, car.col) not in occupied_others:
             row += 1
             heads.add((row, car.col))
-    # posisi sekarang selalu legal
+
     heads.add((car.row, car.col))
     return heads
 
@@ -157,7 +157,7 @@ def ac3_filter(state):
     Return: dict  car_id -> set(head_pos) sesudah arc‑consistency,
             atau None kalau ada domain kosong (dead‑end).
     """
-    # initial domain
+
     domains = {c.id: legal_head_positions(state, c) for c in state.cars.values()}
     queue   = deque((xi, xj)
                     for xi in domains for xj in domains if xi != xj)
@@ -165,7 +165,7 @@ def ac3_filter(state):
     def cells_at(car, head_row, head_col):
         if car.orientation == 'h':
             return [(head_row, head_col + i) for i in range(car.length)]
-        else:  # 'v'
+        else:
             return [(head_row + i, head_col) for i in range(car.length)]
 
     def overlap(car_i_id, pos_i, car_j_id, pos_j):
@@ -180,13 +180,13 @@ def ac3_filter(state):
         xi, xj = queue.popleft()
         removed = set()
         for pos_i in domains[xi]:
-            # pos_i valid bila ADA pos_j yg tdk tabrakan
+        
             if all(overlap(xi, pos_i, xj, pos_j) for pos_j in domains[xj]):
                 removed.add(pos_i)
         if removed:
             domains[xi] -= removed
             if not domains[xi]:
-                return None                    # domain kosong → dead‑end
+                return None                    
             for xk in domains:
                 if xk != xi and xk != xj:
                     queue.append((xk, xi))
@@ -212,7 +212,7 @@ def forward_check(domains, moved_id, moved_head, state):
                      if set(cells_at(state.cars[cid], *head)) & occupied}
         dom -= to_remove
         if not dom:
-            return False  # dead-end
+            return False 
     return True
 
 def ac3_dfs(initial_state):
@@ -245,29 +245,24 @@ def ac3_dfs(initial_state):
             else:
                 new_head = (car.row + delta, car.col)
 
-            # salin domain lama dan update posisi mobil yang baru digerak
             new_domains = {k: set(v) for k, v in doms.items()}
             new_domains[cid] = {new_head}
 
             if not forward_check(new_domains, cid, new_head, next_state):
-                continue  # langsung prune cabang dead-end
+                continue 
 
             stack.append((next_state, path + [move_info], new_domains))
 
     return None
 
-# ------------------------------------------------------------
-#  ITERATIVE DEEPENING DFS – versi benar & lengkap
-# ------------------------------------------------------------
 def iddfs(state, max_depth: int = 40):
     """
     Iterative Deepening DFS:
       –  optimise path length (sama dgn BFS)
       –  memori kecil
     """
-    # loop depth 0 … max_depth
     for depth_limit in range(max_depth + 1):
-        #  visited_local bersifat “per‑jalur”
+
         visited_local = set()
 
         def dfs_ordered_neighbors(state):
@@ -275,57 +270,53 @@ def iddfs(state, max_depth: int = 40):
             Menghasilkan tetangga yang sudah di‑sort agar DFS cenderung
             menemukan solusi lebih cepat (lebih sedikit langkah).
             """
-            neigh = get_neighbors(state)        # [(next_state, (car_id, delta)), …]
+            neigh = get_neighbors(state)      
     
             def score(pair):
                 st, (cid, delta) = pair
-                if cid == 'sh':                 # mobil merah
-                    return 100 if delta == 1 else 50   # kanan prioritas > kiri
+                if cid == 'sh':               
+                    return 100 if delta == 1 else 50  
                 red = st.cars['sh']
-                return 5 - red.col              # semakin kanan (col besar) semakin prioritas
+                return 5 - red.col             
     
             neigh.sort(key=score, reverse=True)
             return neigh
     
         def dfs_limited(st, path, depth):
-            # 1. goal check
+      
             if st.is_goal():
                 return path
-            # 2. batas kedalaman
+      
             if depth == 0:
                 return None
-            # 3. deteksi siklus dlm jalur
+        
             key = tuple(sorted((c.id, c.row, c.col) for c in st.cars.values()))
             if key in visited_local:
                 return None
             visited_local.add(key)
 
-            # 4. expand dengan move ordering
             for nxt_state, mv in dfs_ordered_neighbors(st):
                 res = dfs_limited(nxt_state, path + [mv], depth - 1)
                 if res:
                     return res
 
-            visited_local.remove(key)          # back‑track!
+            visited_local.remove(key)       
             return None
 
         sol = dfs_limited(state, [], depth_limit)
         if sol:
-            return sol     # solusi optimal ditemukan
+            return sol    
 
-    return None            # tidak ada solusi hingga max_depth
+    return None        
 
 
-# ------------------------------------------------------------
-#  AC‑3 + IDDFS (pruning sekali di root)
-# ------------------------------------------------------------
 def ac3_iddfs(initial_state, max_depth: int = 40):
     """
     1. AC‑3 sekali di state awal – mendeteksi dead‑end cepat.
     2. Jika masih konsisten, jalankan IDDFS optimal.
     """
     if ac3_filter(initial_state) is None:
-        return None                      # puzzle buntu sejak awal
+        return None                   
     return iddfs(initial_state, max_depth)
 
 
@@ -337,13 +328,13 @@ def ac3_bfs(initial_state):
       sudah terlihat (visited set).
     Return: list langkah [(car_id, delta), …] atau None.
     """
-    # 1) Pruning awal dengan AC‑3
-    if ac3_filter(initial_state) is None:
-        return None                          # buntu sebelum mulai
 
-    # 2) BFS standar
+    if ac3_filter(initial_state) is None:
+        return None                    
+
+
     visited = set()
-    queue   = deque([(initial_state, [])])   # (state, path‑so‑far)
+    queue   = deque([(initial_state, [])]) 
 
     while queue:
         state, path = queue.popleft()
@@ -353,15 +344,14 @@ def ac3_bfs(initial_state):
         visited.add(key)
 
         if state.is_goal():
-            return path                      # optimal path ditemukan
+            return path                 
 
-        # expand semua tetangga
         for next_state, move_info in get_neighbors(state):
             queue.append((next_state, path + [move_info]))
 
-    return None  # tidak ada solusi
+    return None 
 
-# ----------  Simulated Annealing  ----------
+
 
 import math
 import random
