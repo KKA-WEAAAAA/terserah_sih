@@ -3,7 +3,7 @@ from rushhour_state import RushHourState
 from rushhour_search import *
 
 CELL_SIZE = 80
-HEADER_HEIGHT = 60  # space buat info teks
+HEADER_HEIGHT = 60 
 SCREEN_SIZE = CELL_SIZE * 6
 WINDOW_HEIGHT = SCREEN_SIZE + HEADER_HEIGHT
 
@@ -25,7 +25,6 @@ screen = pygame.display.set_mode((SCREEN_SIZE, WINDOW_HEIGHT))
 pygame.display.set_caption("Rush Hour")
 font = pygame.font.SysFont(None, 36)
 
-# Load gambar sekali di awal
 car_images = {
     'sh2': pygame.image.load('aset\\tcar-h.png'),
     'h2': pygame.image.load('aset\\car-h.png'),
@@ -36,14 +35,14 @@ car_images = {
 }
 
 def draw_background_grid():
-    screen.fill((42, 42, 41))  # Beige
+    screen.fill((42, 42, 41))
 
     for i in range(7):
-        # horizontal garis
+        
         pygame.draw.line(screen, (21, 21, 20),
                          (0, i * CELL_SIZE + HEADER_HEIGHT),
                          (SCREEN_SIZE, i * CELL_SIZE + HEADER_HEIGHT), 2)
-        # vertical garis
+  
         pygame.draw.line(screen, (21, 21, 20),
                          (i * CELL_SIZE, HEADER_HEIGHT),
                          (i * CELL_SIZE, HEADER_HEIGHT + SCREEN_SIZE), 2)
@@ -88,7 +87,7 @@ def draw_menu():
     ac3_text   = font.render("3. AC-3 + BFS",     True, (0, 0, 0))
     sa_text   = font.render("4. Simulated Annealing",     True, (0, 0, 0))
 
-    # Hitung posisi dan rect
+ 
     title_pos = (50, 100)
     bfs_pos = (50, 150)
     astar_pos = (50, 200)
@@ -100,7 +99,7 @@ def draw_menu():
     ac3_rect   = ac3_text.get_rect(topleft=ac3_pos)
     sa_rect   = sa_text.get_rect(topleft=sa_pos)
 
-    # Gambar ke layar
+
     screen.blit(title, title_pos)
     screen.blit(bfs_text, bfs_pos)
     screen.blit(astar_text, astar_pos)
@@ -140,7 +139,7 @@ def keep_gui_alive():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit(); sys.exit()
-    # optional: tampilkan teks “Solving…”
+
     loading = font.render("Solving...", True, (0,0,0))
     screen.blit(loading, (300, 20))
     pygame.display.flip()
@@ -174,7 +173,7 @@ def draw_dataset_menu(dataset_files):
 
 def main():
 
-    # ---------- 1. pilih dataset ----------
+
     dataset_folder = r'dataaset'
     dataset_files  = [f for f in os.listdir(dataset_folder) if f.endswith('.csv')]
 
@@ -183,10 +182,8 @@ def main():
 
     state    = RushHourState.from_csv(csv_path)
 
-    # ---------- 2. pilih algoritma ----------
-    algo = draw_menu()           # 'bfs' / 'astar' / 'ac3'
+    algo = draw_menu()          
 
-        # ---------- 3. thread solver + stopwatch ----------
     solution = []
     solving = True
     start_time = time.time()
@@ -216,7 +213,7 @@ def main():
 
     threading.Thread(target=run_solver, daemon=True).start()
 
-    # ---------- 4. keep GUI alive ----------
+  
     while solving:
         keep_gui_alive()
         time.sleep(0.05)
@@ -224,7 +221,6 @@ def main():
     elapsed_time = time.time() - start_time
     step_count = len(solution) if solution else 0
 
-    # ---------- 5. tampil papan awal + info ----------
     info_string = f"{algo.upper()} | Langkah: {step_count} | Waktu: {elapsed_time:.2f}s"
     draw_state(state, info_string)
     print(f"Algoritma: {algo.upper()} | Langkah = {step_count} | Waktu = {elapsed_time:.2f} detik")
@@ -233,7 +229,7 @@ def main():
 
     print("Tekan SPACE untuk mulai animasi.")
 
-    # tunggu SPACE
+
     waiting = True
     while waiting:
         for event in pygame.event.get():
@@ -242,7 +238,6 @@ def main():
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 waiting = False
 
-    # ---------- 6. animasi ----------
     clock = pygame.time.Clock()
     step = 0
     running = True
